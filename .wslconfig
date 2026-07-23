@@ -1,0 +1,10 @@
+[wsl2]
+memory=25769803776
+networkingMode=mirrored
+dnsTunneling=true
+autoProxy=false
+vmIdleTimeout=300000
+
+[experimental]
+sparseVhd=true
+autoMemoryReclaim=Gradual
