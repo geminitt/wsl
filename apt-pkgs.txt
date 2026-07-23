@@ -22,6 +22,7 @@ grep
 gzip
 hostname
 init
+libasound2-plugins
 libasound2t64
 libatk-bridge2.0-0t64
 libatk1.0-0t64
@@ -40,9 +41,11 @@ libnspr4
 libnss3
 libopenblas-dev
 libpango-1.0-0
+libportaudio2
 libreadline-dev
 libsqlite3-dev
 libssl-dev
+libvulkan1
 libxcomposite1
 libxdamage1
 libxfixes3
@@ -50,6 +53,7 @@ libxkbcommon0
 libxml2-dev
 libxrandr2
 lldb
+mesa-vulkan-drivers
 ncurses-base
 ncurses-bin
 ninja-build
@@ -62,6 +66,7 @@ ubuntu-wsl
 unzip
 util-linux
 valgrind
+vulkan-tools
 wget
 xclip
 xsel
