@@ -3,7 +3,7 @@
 # WSL
 
 [![WSL](https://img.shields.io/badge/WSL2-Ubuntu--26.04-498AF2?style=for-the-badge)](https://ubuntu.com/wsl)
-[![Version](https://img.shields.io/badge/VERSION-0.1.0-A19654?style=for-the-badge)](https://github.com/tkt-gemini/wsl)
+[![Version](https://img.shields.io/badge/VERSION-0.1.0-A19654?style=for-the-badge)](https://github.com/geminitt/wsl)
 [![License](https://img.shields.io/badge/LICENSE-MIT-6B7F4E?style=for-the-badge)](./LICENSE)
 
 **Workflow for Embodied AI**
@@ -157,7 +157,7 @@ mise use -g github:neovim/neovim
 nvim --version
 ```
 
-Configuration [here](https://github.com/tkt-gemini/neovim)
+Configuration [here](https://github.com/geminitt/neovim)
 
 ---
 
