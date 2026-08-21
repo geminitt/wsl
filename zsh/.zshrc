@@ -48,8 +48,7 @@ SAVEHIST=100000
 setopt APPEND_HISTORY INC_APPEND_HISTORY SHARE_HISTORY HIST_IGNORE_DUPS
 
 # Tools initialization
-export PATH="$HOME/.local/bin:$PATH"
-
 eval "$(mise activate zsh)"
 eval "$(zoxide init zsh)"
+source <(fzf --zsh)
 eval "$(starship init zsh)"
