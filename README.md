@@ -6,7 +6,7 @@
 [![Version](https://img.shields.io/badge/VERSION-0.1.0-A19654?style=for-the-badge)](https://github.com/geminitt/wsl)
 [![License](https://img.shields.io/badge/LICENSE-MIT-6B7F4E?style=for-the-badge)](./LICENSE)
 
-**Workflow for Embodied AI**
+**Workflow for AI**
 
 </div>
 
@@ -58,14 +58,21 @@
 
 > Follow the steps **in order** — each layer depends on the one above it.
 
-### Step 1 — APT
+### Step 0: WSL
+
+``` bash
+wsl --update  # update WSL version
+wsl --install Ubuntu-26.04
+```
+
+### Step 1: APT
 
 ```bash
 sudo apt update && sudo apt upgrade -y
-sudo apt install -y $(cat apt-pkgs.txt | grep -v '^#' | tr '\n' ' ')
+grep -v '^#' apt-packages.txt | xargs -r sudo apt install -y
 ```
 
-Packages in [`apt-pkgs.txt`](apt-pkgs.txt)
+Packages in [`apt-packages.txt`](./apt-packages.txt)
 
 #### Git configuration
 
@@ -78,35 +85,10 @@ ssh-keygen -t ed25519 -C "<email>"
 cat ~/.ssh/id_ed25519.pub # copy to SSH Github setting
 ```
 
----
-
-### Step 2 — mise
-
-[mise](https://mise.jdx.dev) manages dev runtimes and CLI tools as versioned.
+### Step 2: Zsh
 
 ```bash
-curl https://mise.run | sh
-echo 'eval "$(~/.local/bin/mise activate zsh)"' >> ~/.zshrc
-source ~/.zshrc
-```
-
-Install runtimes and tools from the shared config:
-
-```bash
-mise install
-mise list
-```
-
-Configuration for mise is [here](./mise-en-place/config.toml)
-
----
-
-### Step 3 — Zsh
-
-#### Set Zsh as default shell
-
-```bash
-chsh -s $(which zsh)
+chsh -s $(which zsh)  # set Zsh as default shell
 ```
 
 #### Zinit
@@ -117,19 +99,27 @@ chsh -s $(which zsh)
 bash -c "$(curl --fail --show-error --silent --location https://raw.githubusercontent.com/zdharma-continuum/zinit/HEAD/scripts/install.sh)"
 ```
 
----
+Configuration for zsh is [here](./zsh)
 
-#### Starship
+### Step 3: mise
+
+[mise](https://mise.jdx.dev) manages dev runtimes and CLI tools as versioned.
 
 ```bash
-curl -sS https://starship.rs/install.sh | sh
+curl https://mise.run | sh
 ```
 
-Configuration for zsh is [here](./zsh/.zshrc)
+Configuration for mise is [here](./mise-en-place/config.toml)
 
----
+Install runtimes and tools from the shared config:
 
-### Step 4 — pixi
+```bash
+mise install
+```
+
+*My configuration of CLI tools:* [Zellij](./zellij/config.kdl) · [Neovim](https://github.com/geminitt/neovim)
+
+### Step 4: Pixi
 
 [pixi](https://pixi.sh) creates conda-based, per-project environments. Ideal for locking CUDA versions alongside Python packages.
 
@@ -139,36 +129,14 @@ curl -fsSL https://pixi.sh/install.sh | bash
 
 ---
 
-### Step 5 — Zellij
-
-```bash
-mise use -g github:zellij-org/zellij
-zellij --version
-```
-
-Configuration [here](./zellij/config.kdl)
-
----
-
-### Step 6 — Neovim
-
-```bash
-mise use -g github:neovim/neovim
-nvim --version
-```
-
-Configuration [here](https://github.com/geminitt/neovim)
-
----
-
 ## Toolchain Summary
 
 | Tool | Role | Managed by |
 |---|---|---|
 | `apt` | System libs, build tools | system |
-| `mise` | Runtimes, CLI tools | `~/.local/share/mise` |
-| `pixi` | Per-project AI/ML envs | project `pixi.toml` |
-| `zsh` + `zinit` | Shell + plugins | `~/.zshrc` |
-| `starship` | Prompt | `~/.config/starship.toml` |
+| `mise` | Runtimes, CLI tools | system |
+| `pixi` | Per-project AI/ML envs | system |
+| `zsh` `zinit` | Shell + plugins | zsh file |
+| `starship` | Prompt | mise (global) |
 | `zellij` | Terminal multiplexer | mise (global) |
 | `neovim` | Editor | mise (global) |
