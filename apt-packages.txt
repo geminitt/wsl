@@ -6,11 +6,16 @@ clang-format
 clang-tidy
 clangd
 cmake
+containerd.io
 coreutils
 coreutils-from-uutils
 curl
 dash
 diffutils
+docker-buildx-plugin
+docker-ce
+docker-ce-cli
+docker-compose-plugin
 dpkg
 fastfetch
 findutils
@@ -19,9 +24,11 @@ gdb
 git
 git-lfs
 gnu-coreutils
+gnupg
 grep
 gzip
 hostname
+htop
 init
 libasound2-plugins
 libasound2t64
@@ -57,6 +64,7 @@ ncdu
 ncurses-base
 ncurses-bin
 ninja-build
+nvtop
 pkg-config
 rust-coreutils
 tar

@@ -19,7 +19,6 @@
 | Windows 11 | WSL2 support required |
 | WSL-2 | `wsl --set-default-version 2` |
 | NVIDIA Driver ≥ 525 | For CUDA passthrough into WSL |
-| Docker Desktop | Enable WSL integration in settings |
 
 ---
 
@@ -28,12 +27,13 @@
 ```
 ┌─────────────────────────────────────────────────────────┐
 │  Windows Host                                           │
-│  NVIDIA Driver (CUDA passthrough)  ·  Docker Desktop    │
+│  NVIDIA Driver (CUDA passthrough)                       │
 └─────────────────────────┬───────────────────────────────┘
                           │ WSL2
 ┌─────────────────────────▼───────────────────────────────┐
 │  1. APT — system layer                                  │
 │     Build tools · system libs · git · curl              │
+│     Docker engine (official)                            │
 ├─────────────────────────────────────────────────────────┤
 │  2. mise — tooling layer                                │
 │     Dev runtimes · ripgrep · bat · fzf · zellij · nvim  │
@@ -67,12 +67,30 @@ wsl --install Ubuntu-26.04
 
 ### Step 1: APT
 
+#### Docker engine (must be added before installing `docker-ce`)
+
+```bash
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+```
+
+#### Install all packages
+
+Packages in [`apt-packages.txt`](./apt-packages.txt)
+
 ```bash
 sudo apt update && sudo apt upgrade -y
 grep -v '^#' apt-packages.txt | xargs -r sudo apt install -y
 ```
 
-Packages in [`apt-packages.txt`](./apt-packages.txt)
+#### Docker daemon
+
+```bash
+sudo systemctl enable --now docker
+sudo usermod -aG docker $USER   # apply via `newgrp docker` or reopen WSL
+```
 
 #### Git configuration
 
@@ -126,17 +144,3 @@ mise install
 ```bash
 curl -fsSL https://pixi.sh/install.sh | bash
 ```
-
----
-
-## Toolchain Summary
-
-| Tool | Role | Managed by |
-|---|---|---|
-| `apt` | System libs, build tools | system |
-| `mise` | Runtimes, CLI tools | system |
-| `pixi` | Per-project AI/ML envs | system |
-| `zsh` `zinit` | Shell + plugins | zsh file |
-| `starship` | Prompt | mise (global) |
-| `zellij` | Terminal multiplexer | mise (global) |
-| `neovim` | Editor | mise (global) |
