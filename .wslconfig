@@ -1,9 +1,12 @@
 [wsl2]
-memory=25769803776
+memory=21474836480
 networkingMode=mirrored
 dnsTunneling=true
 autoProxy=false
 vmIdleTimeout=300000
+processors=16
+swap=8589934592
+defaultVhdSize=549755813888
 
 [experimental]
 sparseVhd=true
