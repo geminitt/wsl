@@ -24,6 +24,8 @@
 
 ## Architecture
 
+> **NOTE:** Wezterm will not be used in this architecture because Windows Terminal is better suited to the Windows OS.
+
 ```
 ┌─────────────────────────────────────────────────────────┐
 │  Windows Host                                           │
@@ -58,14 +60,14 @@
 
 > Follow the steps **in order** — each layer depends on the one above it.
 
-### Step 0: WSL
+### Step 0
 
 ``` bash
 wsl --update  # update WSL version
 wsl --install Ubuntu-26.04
 ```
 
-### Step 1: APT
+### Step 1
 
 #### Docker engine (must be added before installing `docker-ce`)
 
@@ -103,7 +105,7 @@ ssh-keygen -t ed25519 -C "<email>"
 cat ~/.ssh/id_ed25519.pub # copy to SSH Github setting
 ```
 
-### Step 2: Zsh
+### Step 2
 
 ```bash
 chsh -s $(which zsh)  # set Zsh as default shell
@@ -119,7 +121,7 @@ bash -c "$(curl --fail --show-error --silent --location https://raw.githubuserco
 
 Configuration for zsh is [here](./zsh)
 
-### Step 3: mise
+### Step 3
 
 [mise](https://mise.jdx.dev) manages dev runtimes and CLI tools as versioned.
 
@@ -137,7 +139,7 @@ mise install
 
 *My configuration of CLI tools:* [Zellij](./zellij/config.kdl) · [Neovim](https://github.com/geminitt/neovim)
 
-### Step 4: Pixi
+### Step 4
 
 [pixi](https://pixi.sh) creates conda-based, per-project environments. Ideal for locking CUDA versions alongside Python packages.
 
