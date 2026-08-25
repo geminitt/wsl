@@ -67,6 +67,15 @@ wsl --update  # update WSL version
 wsl --install Ubuntu-26.04
 ```
 
+#### `.wslconfig` (Windows side)
+
+Copy [`.wslconfig`](./.wslconfig) to `%UserProfile%\.wslconfig`, then **adjust `memory` / `processors` / `swap` to match your actual host resources** — the checked-in values are tuned for the original machine, not a sane default for every host.
+
+```powershell
+copy .wslconfig $env:USERPROFILE\.wslconfig
+wsl --shutdown  # reload the new limits
+```
+
 ### Step 1
 
 #### Docker engine (must be added before installing `docker-ce`)
@@ -85,6 +94,12 @@ Packages in [`apt-packages.txt`](./apt-packages.txt)
 ```bash
 sudo apt update && sudo apt upgrade -y
 grep -v '^#' apt-packages.txt | xargs -r sudo apt install -y
+```
+
+#### Clone this repository
+
+```bash
+git clone https://github.com/geminitt/wsl.git ~/wsl
 ```
 
 #### Docker daemon
@@ -119,6 +134,14 @@ chsh -s $(which zsh)  # set Zsh as default shell
 bash -c "$(curl --fail --show-error --silent --location https://raw.githubusercontent.com/zdharma-continuum/zinit/HEAD/scripts/install.sh)"
 ```
 
+#### Symlink configuration
+
+Links the tracked configs into `$HOME` (backs up any existing file with a `.bak` suffix first):
+
+```bash
+~/wsl/install.sh
+```
+
 Configuration for zsh is [here](./zsh)
 
 ### Step 3
@@ -129,7 +152,7 @@ Configuration for zsh is [here](./zsh)
 curl https://mise.run | sh
 ```
 
-Configuration for mise is [here](./mise-en-place/config.toml)
+Configuration for mise is [here](./mise-en-place/config.toml) — already symlinked to `~/.config/mise/config.toml` by `install.sh` (Step 2)
 
 Install runtimes and tools from the shared config:
 
@@ -137,7 +160,7 @@ Install runtimes and tools from the shared config:
 mise install
 ```
 
-*My configuration of CLI tools:* [Zellij](./zellij/config.kdl) · [Neovim](https://github.com/geminitt/neovim)
+*My configuration of CLI tools:* [Zellij](./zellij/config.kdl) (also symlinked by `install.sh`) · [Neovim](https://github.com/geminitt/neovim)
 
 ### Step 4
 
