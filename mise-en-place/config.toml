@@ -1,6 +1,7 @@
 [tools]
 bat = "latest"
 claude = "latest"
+antigravity-cli = "latest"
 eza = "latest"
 fd = "latest"
 go = "1.22"
