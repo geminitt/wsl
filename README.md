@@ -140,6 +140,8 @@ ssh-keygen -t ed25519 -C "<email>"
 cat ~/.ssh/id_ed25519.pub # copy to SSH Github setting
 ```
 
+After mise is installed (Step 3), authenticate the GitHub CLI: `gh auth login`
+
 ### Step 2
 
 ```bash
