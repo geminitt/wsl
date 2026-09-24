@@ -35,7 +35,7 @@
 ┌─────────────────────────▼───────────────────────────────┐
 │  1. APT — system layer                                  │
 │     Build tools · system libs · git · curl              │
-│     Docker engine (official)                            │
+│     Docker engine (official) · NVIDIA Container Toolkit │
 ├─────────────────────────────────────────────────────────┤
 │  2. mise — tooling layer                                │
 │     Dev runtimes · ripgrep · bat · fzf · zellij · nvim  │
@@ -87,6 +87,17 @@ sudo chmod a+r /etc/apt/keyrings/docker.asc
 echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 ```
 
+#### NVIDIA Container Toolkit (must be added before installing `nvidia-container-toolkit`)
+
+Lets the Docker engine running inside WSL pass the GPU into containers. The CUDA
+driver itself comes from Windows and needs nothing here; only containers need this.
+Not required if you use Docker Desktop instead of the in-WSL engine.
+
+```bash
+curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /etc/apt/keyrings/nvidia-container-toolkit.gpg
+curl -fsSL https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | sed 's#deb https://#deb [signed-by=/etc/apt/keyrings/nvidia-container-toolkit.gpg] https://#g' | sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list > /dev/null
+```
+
 #### Install all packages
 
 Packages in [`apt-packages.txt`](./apt-packages.txt)
@@ -107,6 +118,15 @@ git clone https://github.com/geminitt/wsl.git ~/wsl
 ```bash
 sudo systemctl enable --now docker
 sudo usermod -aG docker $USER   # apply via `newgrp docker` or reopen WSL
+```
+
+#### GPU in containers
+
+```bash
+sudo nvidia-ctk runtime configure --runtime=docker
+sudo nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml   # detects WSL automatically
+sudo systemctl restart docker
+docker run --rm --gpus all ubuntu nvidia-smi                 # verify
 ```
 
 #### Git configuration

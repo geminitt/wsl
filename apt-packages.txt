@@ -64,6 +64,7 @@ ncdu
 ncurses-base
 ncurses-bin
 ninja-build
+nvidia-container-toolkit
 nvtop
 pkg-config
 rust-coreutils
