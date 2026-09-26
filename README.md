@@ -40,8 +40,9 @@
 │  2. mise — tooling layer                                │
 │     Dev runtimes · ripgrep · bat · fzf · zellij · nvim  │
 ├─────────────────────────────────────────────────────────┤
-│  3. pixi — AI/ML layer (per-project)                    │
-│     PyTorch · transformers · CUDA runtime               │
+│  3. pixi — AI/ML layer                                  │
+│     per project: PyTorch · transformers · CUDA runtime  │
+│     global: AI/ML CLIs (hf)                             │
 ├─────────────────────────────────────────────────────────┤
 │  Shell: Zsh + Zinit + Starship                          │
 │  Multiplexer: Zellij                                    │
@@ -52,7 +53,8 @@
 **Tooling philosophy:**
 - `apt` for system-level packages that don't change often
 - `mise` for portable runtimes and CLI tools across projects
-- `pixi` for reproducible, per-project AI/ML environments with CUDA
+- `pixi` for reproducible, per-project AI/ML environments with CUDA, and `pixi global` for AI/ML
+  command-line tools shared across projects (e.g. the Hugging Face `hf` CLI), from conda-forge without `uv`
 
 ---
 
@@ -190,4 +192,10 @@ mise install
 
 ```bash
 curl -fsSL https://pixi.sh/install.sh | bash
+pixi global sync       # install the global AI/ML CLIs listed in pixi/pixi-global.toml
 ```
+
+The global manifest lives in [`pixi/pixi-global.toml`](./pixi/pixi-global.toml); `install.sh` symlinks
+`~/.pixi/manifests` to this folder, so `pixi global install` / `pixi global remove` edit the tracked file.
+After installing, authenticate the Hugging Face CLI once: `hf auth login` (the token is stored in
+`~/.cache/huggingface/token` and shared by every project).

@@ -1,0 +1,6 @@
+version = 1
+
+[envs.huggingface_hub]
+channels = ["conda-forge"]
+dependencies = { huggingface_hub = "*" }
+exposed = { hf = "hf"}
