@@ -4,3 +4,8 @@ version = 1
 channels = ["conda-forge"]
 dependencies = { huggingface_hub = "*" }
 exposed = { hf = "hf"}
+
+[envs.kaggle]
+channels = ["conda-forge"]
+dependencies = { kaggle = "*" }
+exposed = { kaggle = "kaggle" }
