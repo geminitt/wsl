@@ -9,3 +9,8 @@ exposed = { hf = "hf"}
 channels = ["conda-forge"]
 dependencies = { kaggle = "*" }
 exposed = { kaggle = "kaggle" }
+
+[envs.modal-client]
+channels = ["conda-forge"]
+dependencies = { modal-client = "*" }
+exposed = { modal = "modal" }
