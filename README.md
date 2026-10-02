@@ -186,6 +186,16 @@ mise install
 
 *My configuration of CLI tools:* [Zellij](./zellij/config.kdl) (also symlinked by `install.sh`) · [Neovim](https://github.com/geminitt/neovim)
 
+#### Claude Code
+
+Installed by mise (`claude = "latest"`). Its global instructions and user settings live in
+[`claude/`](./claude) and are symlinked to `~/.claude/CLAUDE.md` and `~/.claude/settings.json` by
+`install.sh` (Step 2). After `mise install`, log in once with `claude` → `/login` (the token in
+`~/.claude/.credentials.json` is never tracked). The plugins and marketplaces listed in
+`settings.json` are reinstalled from the `/plugin` menu if Claude Code does not fetch them on first start.
+
+> **Note:** Per-project memory (`~/.claude/projects/*/memory/`) is not tracked here.
+
 ### Step 4
 
 [pixi](https://pixi.sh) creates conda-based, per-project environments. Ideal for locking CUDA versions alongside Python packages.

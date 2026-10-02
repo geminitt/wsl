@@ -22,3 +22,5 @@ link "zsh/.zshenv"                "$HOME/.zshenv"
 link "zellij/config.kdl"          "$HOME/.config/zellij/config.kdl"
 link "mise-en-place/config.toml"  "$HOME/.config/mise/config.toml"
 link "pixi"                       "$HOME/.pixi/manifests"   # pixi global manifest (AI/ML CLIs)
+link "claude/CLAUDE.md"           "$HOME/.claude/CLAUDE.md"     # global Claude Code instructions
+link "claude/settings.json"       "$HOME/.claude/settings.json" # Claude Code user settings
