@@ -1,4 +1,5 @@
 {
+  "model": "opus",
   "enabledPlugins": {
     "superpowers@superpowers-marketplace": true,
     "papers-skill@xwmxcz-plugins": true,
@@ -39,11 +40,11 @@
   "effortLevel": "high",
   "modelSettings": {
     "claude-opus-5-5": {
-      "effortLevel": "high"
+      "effortLevel": "medium"
     }
   },
   "theme": "auto",
+  "switchModelsOnFlag": true,
   "inputNeededNotifEnabled": true,
-  "agentPushNotifEnabled": true,
-  "switchModelsOnFlag": true
+  "agentPushNotifEnabled": true
 }
