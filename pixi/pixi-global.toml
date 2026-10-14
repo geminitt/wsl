@@ -14,3 +14,8 @@ exposed = { kaggle = "kaggle" }
 channels = ["conda-forge"]
 dependencies = { modal-client = "*" }
 exposed = { modal = "modal" }
+
+[envs.tectonic]
+channels = ["conda-forge"]
+dependencies = { tectonic = "*" }
+exposed = { tectonic = "tectonic" }
