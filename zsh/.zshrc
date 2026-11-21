@@ -1,57 +1,52 @@
-# Zinit installer chunk
-if [[ ! -f $HOME/.local/share/zinit/zinit.git/zinit.zsh ]]; then
-    print -P "%F{33} %F{220}Installing %F{33}ZDHARMA-CONTINUUM%F{220} Initiative Plugin Manager (%F{33}zdharma-continuum/zinit%F{220})…%f"
-    command mkdir -p "$HOME/.local/share/zinit" && command chmod g-rwX "$HOME/.local/share/zinit"
-    command git clone https://github.com/zdharma-continuum/zinit "$HOME/.local/share/zinit/zinit.git" && \
-        print -P "%F{33} %F{34}Installation successful.%f%b" || \
-        print -P "%F{160} The clone has failed.%f%b"
+# Zinit is installed by ./install.sh. Do not clone repositories on every shell startup.
+ZINIT_HOME="$HOME/.local/share/zinit/zinit.git"
+if [[ -f "$ZINIT_HOME/zinit.zsh" ]]; then
+    source "$ZINIT_HOME/zinit.zsh"
+    autoload -Uz _zinit
+    (( ${+_comps} )) && _comps[zinit]=_zinit
+
+    # Fix widgets for Starship.
+    if [[ "${widgets[zle-keymap-select]#user:}" == "starship_zle-keymap-select" || \
+          "${widgets[zle-keymap-select]#user:}" == "starship_zle-keymap-select-wrapped" ]]; then
+        zle -N zle-keymap-select ""
+    fi
+
+    zinit light-mode for \
+        zdharma-continuum/zinit-annex-as-monitor \
+        zdharma-continuum/zinit-annex-bin-gem-node \
+        zdharma-continuum/zinit-annex-patch-dl \
+        zdharma-continuum/zinit-annex-rust
+
+    zinit wait lucid light-mode for \
+        atinit"zicompinit; zicdreplay" \
+            zdharma-continuum/fast-syntax-highlighting \
+        atload"_zsh_autosuggest_start" \
+            zsh-users/zsh-autosuggestions \
+        blockf atpull"zinit creinstall -q ." \
+            zsh-users/zsh-completions
+
+    zinit depth"1" light-mode for \
+        jeffreytse/zsh-vi-mode
+else
+    print -P '%F{yellow}[zsh] Zinit not installed; run ~/wsl/install.sh to set up the shell.%f'
 fi
 
-source "$HOME/.local/share/zinit/zinit.git/zinit.zsh"
-autoload -Uz _zinit
-(( ${+_comps} )) && _comps[zinit]=_zinit
-
-## Fix widgets for Starship
-if [[ "${widgets[zle-keymap-select]#user:}" == "starship_zle-keymap-select" || \
-      "${widgets[zle-keymap-select]#user:}" == "starship_zle-keymap-select-wrapped" ]]; then
-    zle -N zle-keymap-select ""
-fi
-
-## Zinit plugins & annexes
-### Load a few important annexes, without Turbo
-zinit light-mode for \
-    zdharma-continuum/zinit-annex-as-monitor \
-    zdharma-continuum/zinit-annex-bin-gem-node \
-    zdharma-continuum/zinit-annex-patch-dl \
-    zdharma-continuum/zinit-annex-rust
-
-### lazy-loaded plugins
-zinit wait lucid light-mode for \
-    atinit"zicompinit; zicdreplay" \
-        zdharma-continuum/fast-syntax-highlighting \
-    atload"_zsh_autosuggest_start" \
-        zsh-users/zsh-autosuggestions \
-    blockf atpull"zinit creinstall -q ." \
-        zsh-users/zsh-completions
-
-### vi-mode
-zinit depth"1" light-mode for \
-    jeffreytse/zsh-vi-mode
-
-# End of Zinit's installer chunk
-
-# History config
-HISTFILE=$HOME/.zsh_history
+# History.
+HISTFILE="$HOME/.zsh_history"
 HISTSIZE=100000
 SAVEHIST=100000
-
 setopt APPEND_HISTORY INC_APPEND_HISTORY SHARE_HISTORY HIST_IGNORE_DUPS
 
-# Tools initialization
-eval "$(mise activate zsh)"
-eval "$(zoxide init zsh)"
-source <(fzf --zsh)
-eval "$(starship init zsh)"
-
-# Hermes Agent command
-case ":$PATH:" in *":$HOME/.local/bin:"*) ;; *) export PATH="$HOME/.local/bin:$PATH" ;; esac
+# Shared CLI initialization. Guard each command so partial installs stay usable.
+if (( $+commands[mise] )); then
+    eval "$(mise activate zsh)"
+fi
+if (( $+commands[zoxide] )); then
+    eval "$(zoxide init zsh)"
+fi
+if (( $+commands[fzf] )); then
+    source <(fzf --zsh)
+fi
+if (( $+commands[starship] )); then
+    eval "$(starship init zsh)"
+fi
