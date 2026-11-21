@@ -15,7 +15,7 @@
 ## Prerequisites
 
 | Requirement | Notes |
-|---|---|
+| --- | --- |
 | Windows 11 | WSL2 support required |
 | WSL-2 | `wsl --set-default-version 2` |
 | NVIDIA Driver ≥ 525 | For CUDA passthrough into WSL |
@@ -25,187 +25,59 @@
 ## Architecture
 
 > **NOTE:** Wezterm will not be used in this architecture because Windows Terminal is better suited to the Windows OS.
+> I'm still waiting for the Ghostty terminal to be released on Windows 🫤~~~
 
-```
-┌─────────────────────────────────────────────────────────┐
-│  Windows Host                                           │
-│  NVIDIA Driver (CUDA passthrough)                       │
-└─────────────────────────┬───────────────────────────────┘
-                          │ WSL2
-┌─────────────────────────▼───────────────────────────────┐
-│  1. APT — system layer                                  │
-│     Build tools · system libs · git · curl              │
-│     Docker engine (official) · NVIDIA Container Toolkit │
-├─────────────────────────────────────────────────────────┤
-│  2. mise — tooling layer                                │
-│     Dev runtimes · ripgrep · bat · fzf · zellij · nvim  │
-├─────────────────────────────────────────────────────────┤
-│  3. pixi — AI/ML layer                                  │
-│     per project: PyTorch · transformers · CUDA runtime  │
-│     global: AI/ML CLIs (hf)                             │
-├─────────────────────────────────────────────────────────┤
-│  Shell: Zsh + Zinit + Starship                          │
-│  Multiplexer: Zellij                                    │
-│  Editor: Neovim                                         │
-└─────────────────────────────────────────────────────────┘
-```
+![WSL Achitecture](./docs/architecture.packages-manager.png)
 
 **Tooling philosophy:**
-- `apt` for system-level packages that don't change often
-- `mise` for portable runtimes and CLI tools across projects
-- `pixi` for reproducible, per-project AI/ML environments with CUDA, and `pixi global` for AI/ML
-  command-line tools shared across projects (e.g. the Hugging Face `hf` CLI), from conda-forge without `uv`
+
+- `apt` manages Ubuntu system packages, native libraries, build dependencies, and system-level services.
+- `mise` manages developer tools, coding agents, and standalone runtimes used across projects.
+- `pixi` manages isolated, reproducible project environments, including language runtimes, dependencies, and CUDA libraries when needed. `pixi global` manages shared CLI tools distributed through conda-forge, without `uv`.
+
+**Principle**: Each tool has one primary package manager. Project dependencies belong to Pixi; shared development tools belong to mise; system-level dependencies belong to APT.
 
 ---
 
 ## Setup
 
-> Follow the steps **in order** — each layer depends on the one above it.
-
-### Step 0
+### Windows side
 
 ``` bash
-wsl --update  # update WSL version
-wsl --install Ubuntu-26.04
+wsl --update
+wsl --install <distribution> # I'm using the Ubuntu-26.04
 ```
 
-#### `.wslconfig` (Windows side)
+***Options:***
 
-Copy [`.wslconfig`](./.wslconfig) to `%UserProfile%\.wslconfig`, then **adjust `memory` / `processors` / `swap` to match your actual host resources** — the checked-in values are tuned for the original machine, not a sane default for every host.
+Copy [WSL configuration](./.wslconfig) to `%UserProfile%`, then **adjust `memory` / `processors` / `swap` to match your actual host resources** — the checked-in values are tuned for the original machine, not a sane default for every host.
 
 ```powershell
 copy .wslconfig $env:USERPROFILE\.wslconfig
 wsl --shutdown  # reload the new limits
 ```
 
-### Step 1
+### WSL side
 
-#### Docker engine (must be added before installing `docker-ce`)
-
-```bash
-sudo install -m 0755 -d /etc/apt/keyrings
-sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
-sudo chmod a+r /etc/apt/keyrings/docker.asc
-echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-```
-
-#### NVIDIA Container Toolkit (must be added before installing `nvidia-container-toolkit`)
-
-Lets the Docker engine running inside WSL pass the GPU into containers. The CUDA
-driver itself comes from Windows and needs nothing here; only containers need this.
-Not required if you use Docker Desktop instead of the in-WSL engine.
+Clone the repository and run the installation script:
 
 ```bash
-curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /etc/apt/keyrings/nvidia-container-toolkit.gpg
-curl -fsSL https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | sed 's#deb https://#deb [signed-by=/etc/apt/keyrings/nvidia-container-toolkit.gpg] https://#g' | sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list > /dev/null
-```
-
-#### Install all packages
-
-Packages in [`apt-packages.txt`](./apt-packages.txt)
-
-```bash
-sudo apt update && sudo apt upgrade -y
-grep -v '^#' apt-packages.txt | xargs -r sudo apt install -y
-```
-
-#### Clone this repository
-
-```bash
+sudo apt update && sudo apt install -y git
 git clone https://github.com/geminitt/wsl.git ~/wsl
+cd ~/wsl
+./install.sh
 ```
 
-#### Docker daemon
+The script configures the environment in the following order:
 
-```bash
-sudo systemctl enable --now docker
-sudo usermod -aG docker $USER   # apply via `newgrp docker` or reopen WSL
-```
+1. System dependencies, Docker Engine, and optional NVIDIA Container Toolkit.
+2. mise and shared developer tools.
+3. Pixi and global CLI environments.
+4. Shell configuration and managed dotfiles.
+5. Installation verification.
 
-#### GPU in containers
+The installation is designed to be safely repeatable. Existing configurations are preserved before replacement.
 
-```bash
-sudo nvidia-ctk runtime configure --runtime=docker
-sudo nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml   # detects WSL automatically
-sudo systemctl restart docker
-docker run --rm --gpus all ubuntu nvidia-smi                 # verify
-```
+***Post-installation:***
 
-#### Git configuration
-
-```bash
-git config --global user.name  "<name>"
-git config --global user.email "<email>"
-git config --global core.editor "nvim"
-# SSH key for GitHub
-ssh-keygen -t ed25519 -C "<email>"
-cat ~/.ssh/id_ed25519.pub # copy to SSH Github setting
-```
-
-After mise is installed (Step 3), authenticate the GitHub CLI: `gh auth login`
-
-### Step 2
-
-```bash
-chsh -s $(which zsh)  # set Zsh as default shell
-```
-
-#### Zinit
-
-[Zinit](https://github.com/zdharma-continuum/zinit) is a fast Zsh plugin manager with lazy-loading support.
-
-```bash
-bash -c "$(curl --fail --show-error --silent --location https://raw.githubusercontent.com/zdharma-continuum/zinit/HEAD/scripts/install.sh)"
-```
-
-#### Symlink configuration
-
-Links the tracked configs into `$HOME` (backs up any existing file with a `.bak` suffix first):
-
-```bash
-~/wsl/install.sh
-```
-
-Configuration for zsh is [here](./zsh)
-
-### Step 3
-
-[mise](https://mise.jdx.dev) manages dev runtimes and CLI tools as versioned.
-
-```bash
-curl https://mise.run | sh
-```
-
-Configuration for mise is [here](./mise-en-place/config.toml) — already symlinked to `~/.config/mise/config.toml` by `install.sh` (Step 2)
-
-Install runtimes and tools from the shared config:
-
-```bash
-mise install
-```
-
-*My configuration of CLI tools:* [Zellij](./zellij/config.kdl) (also symlinked by `install.sh`) · [Neovim](https://github.com/geminitt/neovim)
-
-#### Claude Code
-
-Installed by mise (`claude = "latest"`). Its global instructions and user settings live in
-[`claude/`](./claude) and are symlinked to `~/.claude/CLAUDE.md` and `~/.claude/settings.json` by
-`install.sh` (Step 2). After `mise install`, log in once with `claude` → `/login` (the token in
-`~/.claude/.credentials.json` is never tracked). The plugins and marketplaces listed in
-`settings.json` are reinstalled from the `/plugin` menu if Claude Code does not fetch them on first start.
-
-> **Note:** Per-project memory (`~/.claude/projects/*/memory/`) is not tracked here.
-
-### Step 4
-
-[pixi](https://pixi.sh) creates conda-based, per-project environments. Ideal for locking CUDA versions alongside Python packages.
-
-```bash
-curl -fsSL https://pixi.sh/install.sh | bash
-pixi global sync       # install the global AI/ML CLIs listed in pixi/pixi-global.toml
-```
-
-The global manifest lives in [`pixi/pixi-global.toml`](./pixi/pixi-global.toml); `install.sh` symlinks
-`~/.pixi/manifests` to this folder, so `pixi global install` / `pixi global remove` edit the tracked file.
-After installing, authenticate the Hugging Face CLI once: `hf auth login` (the token is stored in
-`~/.cache/huggingface/token` and shared by every project).
+Authenticate GitHub, Claude Code, and Hugging Face individually. Restart the WSL session when required for shell or Docker group changes.

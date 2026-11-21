@@ -1,0 +1,31 @@
+[tools]
+# Core development
+node = "24"
+bat = "latest"
+eza = "latest"
+fd = "latest"
+ripgrep = "latest"
+fzf = "latest"
+zoxide = "latest"
+jq = "latest"
+
+# Git
+gh = "latest"
+"github:jesseduffield/lazygit" = "latest"
+
+# Terminal and editor
+"github:neovim/neovim" = "0.12.6"
+"github:zellij-org/zellij" = "latest"
+"github:starship/starship" = "latest"
+tree-sitter = "latest"
+
+# Engineering verification
+shellcheck = "latest"
+
+# Coding agents
+claude = "latest"
+codex = "latest"
+
+# Optional tools
+lazydocker = "latest"
+hyperfine = "latest"
