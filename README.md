@@ -24,7 +24,9 @@
 
 ## Architecture
 
-> **Note:** Windows Terminal is the preferred terminal on Windows. The WezTerm configuration is retained for reference but is not part of the installation.
+> NOTE: Wezterm will not be used in this architecture because Windows Terminal is better suited to the Windows OS. I'm still waiting for the Ghostty terminal to be released on Windows 🫤~~~
+
+**Roadmap update (2026-10-27):** The Ghostty team has dropped plans for an official Windows GUI, while `libghostty` continues to support Windows. See the [Ghostty 1.4.0 roadmap](https://ghostty.org/docs/install/release-notes/1-4-0#roadmap).
 
 ![WSL architecture](./docs/architecture.packages-manager.png)
 
