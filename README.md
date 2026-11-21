@@ -72,7 +72,13 @@ cd ~/wsl
 ./install.sh
 ```
 
-The installer **asks questions interactively while configuring each step**; no command-line options are needed:
+The installer starts with an **interactive mode selector** (no CLI flags):
+
+- **Full installation:** configure OS packages and developer tools, asking before Docker/NVIDIA changes, global Pixi sync, and dotfile replacements. On an existing Docker installation, updates are **off by default** to protect running containers.
+- **Symlinks only:** update the tracked Zsh, Zellij, mise, and Pixi links without `sudo`, package installation, Docker changes, Zinit installation, or Pixi global synchronization. Existing conflicting files are preserved unless you approve a timestamped backup and replacement.
+- **Exit:** make no changes.
+
+Full installation proceeds as follows:
 
 1. Install Ubuntu packages declared in [`list-packages.txt`](./packages-manager/apt/list-packages.txt).
 2. Optionally install Docker Engine from Docker's official APT repository; ask separately about Docker group membership (root-equivalent access).
@@ -97,4 +103,12 @@ For NVIDIA Docker support, verify after the runtime is configured:
 sudo docker run --rm --gpus all ubuntu nvidia-smi
 ```
 
-The installer checks basic configuration and command availability, but a complete fresh-WSL installation still requires end-to-end testing on the target system.
+The installer reports `SUCCESS`, `SKIPPED`, `PENDING`, and `BLOCKED` states; blocked operations return a nonzero exit code. A `SKIPPED` step is not automatically a failure. GPU runtime changes requiring a Docker restart are never applied to the running daemon without confirmation.
+
+Offline regression tests (no system package changes):
+
+```bash
+python3 -m unittest discover -s tests -v
+```
+
+**Note:** Full installation still requires an end-to-end run on the target Ubuntu WSL machine, including Docker Engine, systemd, NVIDIA GPU access and live tool downloads. Mocked tests do not substitute for a real installation.

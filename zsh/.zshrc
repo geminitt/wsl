@@ -5,12 +5,6 @@ if [[ -f "$ZINIT_HOME/zinit.zsh" ]]; then
     autoload -Uz _zinit
     (( ${+_comps} )) && _comps[zinit]=_zinit
 
-    # Fix widgets for Starship.
-    if [[ "${widgets[zle-keymap-select]#user:}" == "starship_zle-keymap-select" || \
-          "${widgets[zle-keymap-select]#user:}" == "starship_zle-keymap-select-wrapped" ]]; then
-        zle -N zle-keymap-select ""
-    fi
-
     zinit light-mode for \
         zdharma-continuum/zinit-annex-as-monitor \
         zdharma-continuum/zinit-annex-bin-gem-node \
@@ -25,6 +19,10 @@ if [[ -f "$ZINIT_HOME/zinit.zsh" ]]; then
         blockf atpull"zinit creinstall -q ." \
             zsh-users/zsh-completions
 
+    # zsh-vi-mode initializes after this file. Rebind fzf widgets afterward.
+    # Use `command -v` here: zsh-vi-mode locally shadows the special $commands hash.
+    typeset -ga zvm_after_init_commands
+    zvm_after_init_commands+=('command -v fzf >/dev/null 2>&1 && source <(fzf --zsh)')
     zinit depth"1" light-mode for \
         jeffreytse/zsh-vi-mode
 else
