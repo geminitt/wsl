@@ -28,7 +28,9 @@
 
 **Roadmap update (2026-10-27):** The Ghostty team has dropped plans for an official Windows GUI, while `libghostty` continues to support Windows. See the [Ghostty 1.4.0 roadmap](https://ghostty.org/docs/install/release-notes/1-4-0#roadmap).
 
-![WSL architecture](./docs/architecture.packages-manager.png)
+<p align="center">
+  <img src="./docs/architecture.packages-manager.png" alt="WSL architecture" width="640">
+</p>
 
 **Tooling philosophy:**
 
