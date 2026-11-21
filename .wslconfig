@@ -10,4 +10,4 @@ defaultVhdSize=549755813888
 
 [experimental]
 sparseVhd=true
-autoMemoryReclaim=Gradual
+autoMemoryReclaim=gradual

@@ -17,17 +17,20 @@
 | Requirement | Notes |
 | --- | --- |
 | Windows 11 | WSL2 support required |
-| WSL-2 | `wsl --set-default-version 2` |
-| NVIDIA Driver ≥ 525 | For CUDA passthrough into WSL |
+| WSL2 | Ubuntu 26.04 LTS |
+| NVIDIA Windows driver | Optional; required only for NVIDIA GPU workloads in WSL |
 
 ---
 
 ## Architecture
 
-> **NOTE:** Wezterm will not be used in this architecture because Windows Terminal is better suited to the Windows OS.
-> I'm still waiting for the Ghostty terminal to be released on Windows 🫤~~~
+> NOTE: Wezterm will not be used in this architecture because Windows Terminal is better suited to the Windows OS. I'm still waiting for the Ghostty terminal to be released on Windows 🫤~~~
 
-![WSL Achitecture](./docs/architecture.packages-manager.png)
+**Roadmap update (2026-10-27):** The Ghostty team has dropped plans for an official Windows GUI, while `libghostty` continues to support Windows. See the [Ghostty 1.4.0 roadmap](https://ghostty.org/docs/install/release-notes/1-4-0#roadmap).
+
+<p align="center">
+  <img src="./docs/architecture.packages-manager.png" alt="WSL architecture" width="450">
+</p>
 
 **Tooling philosophy:**
 
@@ -35,7 +38,7 @@
 - `mise` manages developer tools, coding agents, and standalone runtimes used across projects.
 - `pixi` manages isolated, reproducible project environments, including language runtimes, dependencies, and CUDA libraries when needed. `pixi global` manages shared CLI tools distributed through conda-forge, without `uv`.
 
-**Principle**: Each tool has one primary package manager. Project dependencies belong to Pixi; shared development tools belong to mise; system-level dependencies belong to APT.
+**Principle:** Each tool has one primary package manager. Project dependencies belong to Pixi; shared development tools belong to mise; system-level dependencies belong to APT.
 
 ---
 
@@ -43,23 +46,28 @@
 
 ### Windows side
 
-``` bash
-wsl --update
-wsl --install <distribution> # I'm using the Ubuntu-26.04
-```
-
-***Options:***
-
-Copy [WSL configuration](./.wslconfig) to `%UserProfile%`, then **adjust `memory` / `processors` / `swap` to match your actual host resources** — the checked-in values are tuned for the original machine, not a sane default for every host.
+Run in PowerShell:
 
 ```powershell
-copy .wslconfig $env:USERPROFILE\.wslconfig
-wsl --shutdown  # reload the new limits
+wsl --update
+wsl --list --online                    # Check the distribution name
+wsl --install -d Ubuntu-26.04         # Install the chosen distribution
 ```
+
+**Optional — WSL resource limits:**
+
+Download [`.wslconfig`](./.wslconfig) to a directory on Windows and adjust its `memory`, `processors`, and `swap` settings for your host. From that directory, run:
+
+```powershell
+Copy-Item .\.wslconfig "$env:USERPROFILE\.wslconfig"
+wsl --shutdown                       # Stops all WSL distributions
+```
+
+The checked-in limits reflect the original machine and are not defaults for every host. The Windows-side NVIDIA driver, when needed, is installed on Windows, not inside Ubuntu WSL.
 
 ### WSL side
 
-Clone the repository and run the installation script:
+Open Ubuntu WSL and run:
 
 ```bash
 sudo apt update && sudo apt install -y git
@@ -68,16 +76,43 @@ cd ~/wsl
 ./install.sh
 ```
 
-The script configures the environment in the following order:
+The installer starts with an **interactive mode selector** (no CLI flags):
 
-1. System dependencies, Docker Engine, and optional NVIDIA Container Toolkit.
-2. mise and shared developer tools.
-3. Pixi and global CLI environments.
-4. Shell configuration and managed dotfiles.
-5. Installation verification.
+- **Full installation:** configure OS packages and developer tools, asking before Docker/NVIDIA changes, global Pixi sync, and dotfile replacements. On an existing Docker installation, updates are **off by default** to protect running containers.
+- **Symlinks only:** update the tracked Zsh, Zellij, mise, and Pixi links without `sudo`, package installation, Docker changes, Zinit installation, or Pixi global synchronization. Existing conflicting files are preserved unless you approve a timestamped backup and replacement.
+- **Exit:** make no changes.
 
-The installation is designed to be safely repeatable. Existing configurations are preserved before replacement.
+Full installation proceeds as follows:
 
-***Post-installation:***
+1. Install Ubuntu packages declared in [`list-packages.txt`](./packages-manager/apt/list-packages.txt).
+2. Optionally install Docker Engine from Docker's official APT repository; ask separately about Docker group membership (root-equivalent access).
+3. If an NVIDIA GPU is available in WSL, optionally install GPU monitoring and configure NVIDIA Container Toolkit for Docker.
+4. Install mise and the shared tools in [`config.toml`](./packages-manager/mise/config.toml).
+5. Install Pixi and ask before synchronizing [`pixi-global.toml`](./packages-manager/pixi/pixi-global.toml). Sync may remove global environments absent from the manifest.
+6. Install Zinit, link Zsh/Zellij configuration files, and optionally make Zsh the default shell.
 
-Authenticate GitHub, Claude Code, and Hugging Face individually. Restart the WSL session when required for shell or Docker group changes.
+Existing conflicting dotfiles are preserved unless you approve their replacement; the original file is then saved with a timestamped `.bak.*` name. Re-running the script skips symlinks already pointing to the correct files. The installer does not remove conflicting Docker packages or manage Windows settings.
+
+**Post-installation:** Reopen WSL if you changed the default shell or joined the Docker group. Authenticate services individually:
+
+```bash
+gh auth login
+claude                   # Follow the interactive login instructions
+hf auth login
+```
+
+For NVIDIA Docker support, verify after the runtime is configured:
+
+```bash
+sudo docker run --rm --gpus all ubuntu nvidia-smi
+```
+
+The installer reports `SUCCESS`, `SKIPPED`, `PENDING`, and `BLOCKED` states; blocked operations return a nonzero exit code. A `SKIPPED` step is not automatically a failure. GPU runtime changes requiring a Docker restart are never applied to the running daemon without confirmation.
+
+Offline regression tests (no system package changes):
+
+```bash
+python3 -m unittest discover -s tests -v
+```
+
+**Note:** Full installation still requires an end-to-end run on the target Ubuntu WSL machine, including Docker Engine, systemd, NVIDIA GPU access and live tool downloads. Mocked tests do not substitute for a real installation.

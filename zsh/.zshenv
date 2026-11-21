@@ -1,3 +1,4 @@
-export PATH="$HOME/.local/bin:$HOME/.pixi/bin:$HOME/.local/share/mise/installs/node/24.22.1/bin:$PATH"
+# User-level binaries; mise activates managed runtimes in .zshrc.
+export PATH="$HOME/.local/bin:$HOME/.pixi/bin:$PATH"
 export EDITOR="nvim"
 export VISUAL="nvim"
